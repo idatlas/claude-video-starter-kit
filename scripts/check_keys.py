@@ -18,14 +18,14 @@ def show(name, good, msg):
 
 
 k = os.environ.get("PEXELS_API_KEY", "")
-if not k or k.startswith("paste"):
+if not k or k.startswith("paste-your-"):
     show("Pexels", False, "no key in .env yet")
 else:
     r = requests.get("https://api.pexels.com/v1/search", headers={"Authorization": k}, params={"query": "test", "per_page": 1}, timeout=20)
     show("Pexels", r.status_code == 200, "key works" if r.status_code == 200 else f"Pexels said {r.status_code}; copy the key again")
 
 k = os.environ.get("ELEVENLABS_API_KEY", "")
-if not k or k.startswith("paste"):
+if not k or k.startswith("paste-your-"):
     show("ElevenLabs", False, "no key in .env yet")
 else:
     r = requests.get("https://api.elevenlabs.io/v1/user/subscription", headers={"xi-api-key": k}, timeout=20)

@@ -55,7 +55,8 @@ Always run Python as `.venv/bin/python` from this folder.
 ## Captions (default style)
 
 White, bold, black outline and shadow, bottom center, whole phrase at a time (`"mode": "phrase"`).
-Change with `"captions": {"mode": "karaoke" | "pop" | "phrase" | "off", "position": "top", "style": {...}}`,
+Change with `"captions": {"mode": "karaoke" | "pop" | "phrase" | "off", "position": "top", "topDuring": [[12, 15.5]], "style": {...}}`
+(`topDuring` moves captions to the top for those seconds only, e.g. while a click happens at the bottom),
 where style is CSS variables from `templates/lib/base.css`: `--cap-color`, `--cap-size`,
 `--cap-font`, `--cap-weight`, `--cap-bg` (a box behind the words), `--cap-highlight`,
 `--cap-bottom`, `--cap-shadow`. Always also offer `captions.py` for a `.srt`/`.vtt` file.

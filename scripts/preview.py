@@ -29,10 +29,17 @@ def main():
         kit.need("ffmpeg")
         info = kit.probe(a.video)
         tmp = tempfile.mkdtemp()
-        subprocess.run(["ffmpeg", "-v", "error", "-i", a.video, "-vf", f"fps=1/{a.every},scale=640:-2",
-                        os.path.join(tmp, "%04d.jpg")], check=True)
-        ims = sorted(os.path.join(tmp, f) for f in os.listdir(tmp))
-        labels = [kit.fmt_time(k * a.every) for k in range(len(ims))]
+        # grab the frame at each exact time, so every label is the true time of its picture
+        times, t = [], 0.0
+        while t < info["duration"] - 0.05:
+            times.append(round(t, 3)); t += a.every
+        ims, labels = [], []
+        for k, t in enumerate(times):
+            path = os.path.join(tmp, f"{k:04d}.jpg")
+            subprocess.run(["ffmpeg", "-v", "error", "-ss", str(t), "-i", a.video, "-frames:v", "1",
+                            "-vf", "scale=640:-2", path], check=True)
+            if os.path.exists(path):
+                ims.append(path); labels.append(kit.fmt_time(t))
         out = os.path.splitext(a.video)[0] + "-sheet.png"
         kit.sheet(ims, labels, out, cols=a.cols)
         shutil.rmtree(tmp)

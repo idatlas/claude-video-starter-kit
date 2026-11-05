@@ -5,6 +5,8 @@
              "pop"     words appear one by one as they're spoken
              "off"
      "position": "bottom" | "top"
+     "topDuring": [[12.0, 15.5], ...]  move captions to the top for these stretches (seconds),
+                  e.g. while you click a button at the bottom of the screen
      "style": any CSS variable below, e.g. {"--cap-color": "#FFE14D", "--cap-size": "5.4vh"} */
 (function () {
   const D = window.DATA || {};
@@ -28,6 +30,8 @@
       C.el.innerHTML = k < 0 ? '' : '<span class="cap-line">' +
         P[k].words.map(w => `<span class="w">${K.esc(w.word)}</span>`).join(' ') + '</span>';
     }
+    const top = ((D.captions || {}).topDuring || []).some(r => t >= r[0] && t < r[1]);
+    C.el.classList.toggle('top', top || (D.captions || {}).position === 'top');
     if (k < 0) return;
     const ph = P[k], mode = (D.captions || {}).mode || 'phrase';
     C.el.style.opacity = Math.min(K.prog(t, ph.start - 0.05, ph.start + 0.07), 1 - K.prog(t, ph.hold - 0.08, ph.hold));

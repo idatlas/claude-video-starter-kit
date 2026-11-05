@@ -12,6 +12,6 @@ check "Chromium"            ".venv/bin/python -c 'from playwright.sync_api impor
 check "Speech model"        "test -s models/ggml-small.en.bin -o -n \"\$WHISPER_MODEL\""   "./setup.sh"
 check ".env file"           "test -f .env"                            "bash scripts/keys.sh"
 for k in PEXELS_API_KEY ELEVENLABS_API_KEY; do
-  check "$k in .env" "grep -Eq '^$k=[^p ].{8,}' .env" "bash scripts/keys.sh, then paste the key"
+  check "$k in .env" "grep -E '^$k=.{8,}' .env | grep -vq '=paste-your-'" "bash scripts/keys.sh, then paste the key"
 done
 [ $ok = 1 ] && echo "Everything is installed. Next: .venv/bin/python scripts/check_keys.py" || echo "Fix the MISSING lines above."
