@@ -299,7 +299,7 @@ def sheet(images, labels, out, cols=4, thumb_w=480):
     th = int(ims[0].height * tw / ims[0].width)
     rows = math.ceil(len(ims) / cols)
     pad, lab = 12, 30
-    S = Image.new("RGB", (cols * (tw + pad) + pad, rows * (th + lab + pad) + pad), (24, 24, 28))
+    S = Image.new("RGB", (cols * (tw + pad) + pad, rows * (th + lab + pad) + pad), (31, 36, 48))
     d = ImageDraw.Draw(S)
     try:
         font = ImageFont.truetype(os.path.join(KIT, "templates", "fonts", "Inter.ttf"), 20)
@@ -309,7 +309,7 @@ def sheet(images, labels, out, cols=4, thumb_w=480):
         x = pad + (k % cols) * (tw + pad)
         y = pad + (k // cols) * (th + lab + pad)
         S.paste(im.resize((tw, th)), (x, y + lab))
-        d.text((x + 2, y + 4), l, fill=(235, 235, 240), font=font)
+        d.text((x + 2, y + 4), l, fill=(255, 253, 247), font=font)
     S.save(out)
     return out
 

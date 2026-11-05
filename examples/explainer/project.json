@@ -67,7 +67,7 @@
    "start": 2.4,
    "end": 9.3,
    "transition": "slide",
-   "paper": "#E9EEF0",
+   "paper": "#EADFC9",
    "camera": {
     "from": [
      1.5,
@@ -229,7 +229,7 @@
    "start": 16.2,
    "end": 19.8,
    "transition": "slide",
-   "paper": "#EFE6F0",
+   "paper": "#EADFC9",
    "camera": {
     "from": [
      1,
@@ -322,7 +322,7 @@
    "start": 25.4,
    "end": 29.9,
    "transition": "slide",
-   "paper": "#E4EFEA",
+   "paper": "#EADFC9",
    "camera": {
     "from": [
      0,

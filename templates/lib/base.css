@@ -4,7 +4,7 @@
 @font-face { font-family: 'Caveat'; src: url('../fonts/Caveat.ttf'); font-weight: 400 700; }
 
 :root {
-  --accent: #FF7A45; --accent2: #4DA3FF; --text: #FFFFFF; --bg: #12151B; --bg2: #1E232D;
+  --accent: #FF7A45; --accent2: #2FA4A0; --text: #FFFFFF; --bg: #1F2430; --bg2: #2C3445;
   --font: 'Inter'; --font-display: 'Poppins';
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,4 +29,4 @@ html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
 .captions .w { display: inline-block; transform-origin: 50% 80%; }
-.captions.karaoke .w.now { color: var(--cap-highlight, #FFD84D); }
+.captions.karaoke .w.now { color: var(--cap-highlight, var(--accent)); }

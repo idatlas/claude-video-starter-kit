@@ -11,8 +11,8 @@
  },
  "brand": {
   "accent": "#FF7A45",
-  "bg": "#101318",
-  "bg2": "#232A36"
+  "bg": "#1F2430",
+  "bg2": "#2C3445"
  },
  "captions": {
   "mode": "phrase"
