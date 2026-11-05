@@ -1,0 +1,3 @@
+This is where you find your key. Open API Keys in the menu.
+
+Then click Copy key. Don't paste it into a chat. Paste it into your env file.

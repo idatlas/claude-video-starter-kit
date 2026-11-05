@@ -1,0 +1,179 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Screen-recording tutorial.
+  project.json:
+    "video": "cut.mp4"                     the recording (after scripts/cut.py)
+    "frame": "inset" | "full"              inset = recording on a card with a margin (default)
+    "zooms":  [{"start": 4, "end": 9, "x": 0.72, "y": 0.18, "scale": 2.2}]
+              x, y = the point to zoom to, as fractions of the recording (0,0 top-left; 1,1 bottom-right)
+    "notes":  annotations, each with "start" and "end" (seconds) and a "type":
+       box       {"x","y","w","h"}           outline around an area
+       spotlight {"x","y","w","h"}           darken everything except an area
+       click     {"x","y"}                   ripple where the mouse clicked (start = the click)
+       arrow     {"x","y","from": "left"|"right"|"top"|"bottom"}
+       label     {"x","y","text","side": "right"|"left"|"top"|"bottom"}
+       keys      {"text": "Cmd + Shift + 5"}  keyboard shortcut chips, bottom center
+       step      {"text": "Step 2: Paste your key"}  badge, top left
+       title     {"text","sub"}              lower-third title card
+     Privacy (these never fade; leave out start/end to cover the whole video):
+       blur      {"x","y","w","h"}           heavy blur over an area (sidebars, avatars, other people's names)
+       replace   {"x","y","w","h","text","bg","color","weight"}  cover with fake text, e.g. "Alex Rivera" over a real name
+       dots      {"x","y","w","h","bg","color"}         cover with ●●●●●●, like a hidden key
+     Find what to hide with: python scripts/redact.py <frame.png> --auto
+    Positions in box/spotlight/click/arrow/label are fractions of the recording, so they follow the zoom.
+    Tip: ask Claude for "a preview frame with a grid" to read positions off the recording. -->
+<link rel="stylesheet" href="../lib/base.css">
+<style>
+  #screenbox { position: absolute; overflow: hidden; background: #000; }
+  .inset #screenbox { border-radius: 1.4vh; box-shadow: 0 2.5vh 6vh rgba(0,0,0,.55), 0 0 0 .12vh rgba(255,255,255,.08); }
+  #screen { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #rec { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .bg { position: absolute; inset: 0; background: radial-gradient(120% 90% at 30% 20%, var(--bg2), var(--bg) 70%); }
+  .n { position: absolute; pointer-events: none; }
+  .box { border: calc(.45vh * var(--inv)) solid var(--accent); border-radius: calc(.8vh * var(--inv));
+         box-shadow: 0 0 calc(2vh * var(--inv)) color-mix(in srgb, var(--accent) 55%, transparent); }
+  .spot { border-radius: calc(.8vh * var(--inv)); box-shadow: 0 0 0 300vmax rgba(5,8,14,.62); }
+  .ring { border: calc(.5vh * var(--inv)) solid var(--accent); border-radius: 50%; transform: translate(-50%,-50%); }
+  .dot { width: calc(1.6vh * var(--inv)); height: calc(1.6vh * var(--inv)); background: var(--accent); border-radius: 50%; transform: translate(-50%,-50%); }
+  .arrow { width: calc(9vh * var(--inv)); height: calc(4vh * var(--inv)); }
+  .arrow svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 .4vh .8vh rgba(0,0,0,.5)); }
+  .label { font: 700 calc(3vh * var(--inv))/1.2 var(--font), sans-serif; color: #111; background: #fff; white-space: nowrap;
+           padding: calc(.8vh * var(--inv)) calc(1.4vh * var(--inv)); border-radius: calc(1vh * var(--inv));
+           box-shadow: 0 calc(.6vh * var(--inv)) calc(2vh * var(--inv)) rgba(0,0,0,.35); border-left: calc(.6vh * var(--inv)) solid var(--accent); }
+  .keys { position: absolute; left: 50%; bottom: 17vh; transform: translateX(-50%); display: flex; gap: 1vh; align-items: center; z-index: 40;
+          font: 700 3.2vh var(--font), sans-serif; color: #fff; }
+  .keys .k { background: linear-gradient(#3a3f4a, #262a33); border: .15vh solid #555b66; border-bottom-width: .5vh; border-radius: 1vh; padding: .9vh 1.8vh; box-shadow: 0 1vh 2vh rgba(0,0,0,.4); }
+  .keys .plus { opacity: .7; }
+  .step { position: absolute; left: 3vw; top: 4vh; z-index: 40; font: 700 2.6vh var(--font), sans-serif; color: #fff;
+          background: rgba(15,18,24,.86); border: .15vh solid rgba(255,255,255,.12); padding: 1.1vh 2vh 1.1vh 1.4vh; border-radius: 4vh;
+          display: flex; align-items: center; gap: 1.2vh; backdrop-filter: blur(8px); }
+  .step::before { content: ''; width: 1.4vh; height: 1.4vh; border-radius: 50%; background: var(--accent); }
+  .inset .step { top: 0.9vh; }
+  .blur { backdrop-filter: blur(14px) saturate(.6); -webkit-backdrop-filter: blur(14px) saturate(.6); background: rgba(128,128,128,.12); border-radius: 4px; }
+  .replace { display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-family: var(--font), -apple-system, sans-serif; }
+  .title { position: absolute; left: 5vw; bottom: 15vh; z-index: 40; padding: 2.4vh 3.2vh 2.6vh; border-radius: 1.6vh;
+           background: rgba(14,17,23,.92); border-left: .9vh solid var(--accent); box-shadow: 0 2vh 5vh rgba(0,0,0,.5); }
+  .title h1 { font: 800 5vh/1.1 var(--font-display), sans-serif; letter-spacing: -.01em; }
+  .title p { font: 500 2.6vh/1.3 var(--font), sans-serif; opacity: .8; margin-top: .8vh; }
+</style></head>
+<body><div id="stage"><div class="bg"></div><div id="screenbox"><div id="screen"><img id="rec"></div></div></div>
+<script src="../lib/engine.js"></script>
+<script src="../lib/captions.js"></script>
+<script>
+const D = window.DATA, stage = document.getElementById('stage'), box = document.getElementById('screenbox'),
+      screen = document.getElementById('screen'), rec = document.getElementById('rec');
+K.brand();
+const VW = innerWidth, VH = innerHeight;
+let RW = 16, RH = 10;   // recording's shape, read from the first frame
+
+window.READY = (async () => {
+  await K.loadImg(rec, K.seq(D.videoFrames, 0));
+  RW = rec.naturalWidth; RH = rec.naturalHeight;
+  const inset = (D.frame || 'inset') === 'inset';
+  document.body.classList.toggle('inset', inset);
+  const maxW = VW * (inset ? 0.9 : 1), maxH = VH * (inset ? 0.86 : 1);
+  const s = Math.min(maxW / RW, maxH / RH);
+  const w = Math.round(RW * s), h = Math.round(RH * s);
+  Object.assign(box.style, { width: w + 'px', height: h + 'px', left: (VW - w) / 2 + 'px', top: (VH - h) / 2 - (inset ? VH * 0.01 : 0) + 'px' });
+  Object.assign(screen.style, { width: w + 'px', height: h + 'px' });
+  window.SW = w; window.SH = h;
+  // build every note once; render() only moves and fades them
+  for (const n of (D.notes || [])) n.el = build(n);
+  if (D.grid) {   /* preview.py --grid: lines every 10% of the recording, to read positions off */
+    const g = document.createElement('div');
+    g.style.cssText = 'position:absolute;inset:0;z-index:60;pointer-events:none';
+    for (let k = 1; k < 10; k++) {
+      g.innerHTML += `<div style="position:absolute;left:${k * 10}%;top:0;bottom:0;border-left:1px solid rgba(255,0,180,.7)"><span style="position:absolute;top:2px;left:3px;font:700 12px sans-serif;color:#f0a;background:#fff">${k / 10}</span></div>`
+                   + `<div style="position:absolute;top:${k * 10}%;left:0;right:0;border-top:1px solid rgba(255,0,180,.7)"><span style="position:absolute;left:2px;top:2px;font:700 12px sans-serif;color:#f0a;background:#fff">${k / 10}</span></div>`;
+    }
+    screen.appendChild(g);
+  }
+  Captions.mount(stage);
+})();
+
+function build(n) {
+  const el = document.createElement('div');
+  const onScreen = ['box', 'spotlight', 'click', 'arrow', 'label', 'blur', 'replace', 'dots'].includes(n.type);
+  if (['blur', 'replace', 'dots'].includes(n.type)) {
+    n.start = n.start == null ? -1 : n.start; n.end = n.end == null ? 1e9 : n.end; n.privacy = true;
+    el.className = 'n ' + (n.type === 'blur' ? 'blur' : 'replace');
+    Object.assign(el.style, { left: n.x * 100 + '%', top: n.y * 100 + '%', width: n.w * 100 + '%', height: n.h * 100 + '%', zIndex: 30 });
+    if (n.type !== 'blur') {
+      el.style.background = n.bg || '#FFFFFF'; el.style.color = n.color || '#222'; el.style.fontWeight = n.weight || 600;
+      el.style.fontSize = (n.size || n.h * SH * 0.72) + 'px';
+      el.textContent = n.type === 'dots' ? '●'.repeat(Math.max(8, Math.round(n.w * SW / (n.h * SH * 0.8)))) : n.text;
+    }
+  }
+  el.className = 'n ' + ({ spotlight: 'spot' }[n.type] || n.type);
+  if (n.type === 'box' || n.type === 'spotlight') Object.assign(el.style, { left: n.x * 100 + '%', top: n.y * 100 + '%', width: n.w * 100 + '%', height: n.h * 100 + '%' });
+  if (n.type === 'click') { el.className = 'n'; el.style.left = n.x * 100 + '%'; el.style.top = n.y * 100 + '%';
+    el.innerHTML = '<div class="n ring r1"></div><div class="n ring r2"></div><div class="n dot"></div>'; }
+  if (n.type === 'arrow') {
+    const rot = { left: 0, top: 90, right: 180, bottom: 270 }[n.from || 'left'];
+    el.style.left = n.x * 100 + '%'; el.style.top = n.y * 100 + '%';
+    el.dataset.rot = rot;
+    el.innerHTML = `<svg viewBox="0 0 90 40"><path d="M2 20 H66" stroke="var(--accent)" stroke-width="9" stroke-linecap="round"/><path d="M58 4 L88 20 L58 36 Z" fill="var(--accent)"/></svg>`;
+  }
+  if (n.type === 'label') { el.textContent = n.text; el.style.left = n.x * 100 + '%'; el.style.top = n.y * 100 + '%'; }
+  if (n.type === 'keys') { el.className = 'keys'; el.innerHTML = n.text.split('+').map(k => `<span class="k">${K.esc(k.trim())}</span>`).join('<span class="plus">+</span>'); }
+  if (n.type === 'step') { el.className = 'step'; el.textContent = n.text; }
+  if (n.type === 'title') { el.className = 'title'; el.innerHTML = `<h1>${K.esc(n.text)}</h1>` + (n.sub ? `<p>${K.esc(n.sub)}</p>` : ''); }
+  (onScreen ? screen : stage).appendChild(el);
+  return el;
+}
+
+/* zoom state at time t: scale and the point (cx, cy) kept in the middle */
+function camera(t) {
+  let s = 1, cx = 0.5, cy = 0.5;
+  const T = 0.7;   // seconds to zoom in or out
+  for (const z of (D.zooms || [])) {
+    const p = K.ease.inOut(Math.min(K.prog(t, z.start, z.start + T), 1 - K.prog(t, z.end - T, z.end)));
+    if (p <= 0) continue;
+    const S = z.scale || 2;
+    const X = K.clamp(z.x, 0.5 / S, 1 - 0.5 / S), Y = K.clamp(z.y, 0.5 / S, 1 - 0.5 / S);
+    s = K.lerp(1, S, p); cx = K.lerp(0.5, X, p); cy = K.lerp(0.5, Y, p);
+  }
+  return { s, cx, cy };
+}
+
+window.render = async (t) => {
+  await K.loadImg(rec, K.seq(D.videoFrames, t));
+  const c = camera(t);
+  const tx = SW * 0.5 - c.cx * SW * c.s, ty = SH * 0.5 - c.cy * SH * c.s;
+  screen.style.transform = `translate(${tx}px, ${ty}px) scale(${c.s})`;
+  screen.style.setProperty('--inv', 1 / c.s);
+  for (const n of (D.notes || [])) {
+    const el = n.el, o = n.privacy ? (t >= n.start && t < n.end ? 1 : 0) : K.fade(t, n.start, n.end, 0.25, 0.25);
+    el.style.opacity = o;
+    if (!o && n.type !== 'click') continue;
+    const p = K.ease.out(K.prog(t, n.start, n.start + 0.35));
+    if (n.type === 'box') el.style.transform = `scale(${K.lerp(1.06, 1, p)})`;
+    if (n.type === 'label') {
+      const side = n.side || 'right', g = `calc(2vh * ${1 / c.s})`;
+      const base = { right: `translate(${g}, -50%)`, left: `translate(calc(-100% - ${g}), -50%)`, top: `translate(-50%, calc(-100% - ${g}))`, bottom: `translate(-50%, ${g})` }[side];
+      el.style.transform = `${base} translateY(${(1 - p) * 1.5}vh)`;
+    }
+    if (n.type === 'arrow') {
+      const bob = Math.sin((t - n.start) * 4) * 0.6;
+      el.style.transform = `rotate(${el.dataset.rot}deg) translate(calc(-100% - ${(1 - p) * 4 + 0.6 + bob * 0.3}vh), -50%)`;
+      el.style.transformOrigin = '0 0';
+    }
+    if (n.type === 'click') {
+      el.style.opacity = 1;
+      const a = t - n.start;
+      el.querySelectorAll('.ring').forEach((r, i) => {
+        const q = K.clamp((a - i * 0.12) / 0.6);
+        const d = K.lerp(1, 7, K.ease.out(q));
+        Object.assign(r.style, { width: `calc(${d}vh * ${1 / c.s})`, height: `calc(${d}vh * ${1 / c.s})`, opacity: a < 0 || q >= 1 ? 0 : 1 - q });
+      });
+      el.querySelector('.dot').style.opacity = a >= 0 && a < 0.5 ? 1 - a / 0.5 : 0;
+    }
+    if (n.type === 'title' || n.type === 'step' || n.type === 'keys') {
+      const dir = n.type === 'title' ? 'translateX' : 'translateY';
+      const extra = n.type === 'keys' ? 'translateX(-50%) ' : '';
+      el.style.transform = `${extra}${dir}(${(1 - p) * (n.type === 'title' ? -3 : 1.5)}vh)`;
+    }
+  }
+  Captions.update(t);
+};
+</script></body></html>

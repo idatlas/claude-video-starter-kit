@@ -1,0 +1,162 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Paper-cutout explainer: flat art layers (transparent PNGs) that pop, slide and sway on paper.
+  project.json:
+    "audio": "voice.mp3", "words": "words.json"
+    "paper": "#F2E8D5"          background paper color
+    "stepFps": 12               motion moves in steps, like stop-motion (0 = smooth)
+    "scenes": [{
+       "start": 0, "end": 7.5, "paper": "#E7EEF2", "transition": "slide",   (slide | fade | cut)
+       "camera": {"from": [0, 0, 1], "to": [-3, 0, 1.06]},   [x drift %, y drift %, zoom] across the scene
+       "layers": [
+         {"src": "art/laptop-cut.png", "x": 50, "y": 58, "h": 46, "depth": 1,
+          "in": {"at": 0.4, "type": "pop"}, "out": {"at": 6.8, "type": "drop"}, "sway": 1.5},
+         {"text": "Claude writes the edit", "style": "label", "x": 50, "y": 18, "in": {"at": 1.2, "type": "drop"}}
+       ]}]
+    Layer fields:
+      x, y      center of the layer, % of the frame
+      h         height, % of the frame (or "w" for width)
+      depth     how much it moves with the camera: 0 = far away (still), 1 = normal, 1.5 = close
+      in.type   pop | drop | rise | slide | grow | fade    (in.from: left | right | top | bottom for slide)
+      out.type  pop | drop | slide | fade
+      sway      gentle rocking, degrees;   bob: gentle up-and-down, % of frame
+      spin      keeps turning, degrees per second (gears, wheels)
+      rot       tilt in degrees;   flip: true mirrors it;   shadow: false turns the paper shadow off
+      text      a paper label instead of an image; style: label | title | note -->
+<link rel="stylesheet" href="../lib/base.css">
+<style>
+  :root { --paper: #F2E8D5; --ink: #1F2430; }
+  body { background: var(--paper); }
+  .scene { position: absolute; inset: 0; overflow: hidden; background: var(--sp, var(--paper)); }
+  .grain { position: absolute; inset: -5%; pointer-events: none; opacity: .5; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .3  0 0 0 .28 0'/></filter><rect width='400' height='400' filter='url(%23n)'/></svg>"); }
+  .fibre { position: absolute; inset: -5%; pointer-events: none; opacity: .35; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012 .09' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .42  0 0 0 0 .33  0 0 0 .22 0'/></filter><rect width='900' height='900' filter='url(%23f)'/></svg>"); }
+  .vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 100% at 50% 45%, transparent 55%, rgba(60,40,20,.22)); z-index: 30; }
+  .world { position: absolute; inset: 0; transform-origin: 50% 50%; }
+  .layer { position: absolute; transform-origin: 50% 85%; will-change: transform; }
+  .layer img { display: block; height: 100%; width: auto; }
+  .layer.shadow img, .layer.shadow .paper { filter: drop-shadow(.35vh .55vh 0 rgba(40,28,15,.28)) drop-shadow(0 1.2vh 1.6vh rgba(40,28,15,.18)); }
+  .paper { white-space: nowrap; color: var(--ink); }
+  .paper.label { font: 700 4.4vh/1.1 var(--font-display), sans-serif; background: #FFFDF7; padding: 1.4vh 3vh 1.6vh; border-radius: .5vh; }
+  .paper.title { font: 800 9vh/1.02 var(--font-display), sans-serif; letter-spacing: -.02em; background: #FFFDF7; padding: 2vh 4.5vh 2.6vh; border-radius: .6vh; }
+  .paper.note { font: 700 6vh/1 'Caveat', cursive; background: #FFE9A8; padding: 1.6vh 3vh 2vh; border-radius: .3vh; }
+  .paper .acc { color: var(--accent); }
+</style></head>
+<body><div id="stage"></div>
+<script src="../lib/engine.js"></script>
+<script src="../lib/captions.js"></script>
+<script>
+const D = window.DATA, stage = document.getElementById('stage');
+K.brand();
+if (D.paper) document.documentElement.style.setProperty('--paper', D.paper);
+const S = D.scenes || [];
+const STEP = D.stepFps === undefined ? 12 : D.stepFps;
+const rich = s => K.esc(s).replace(/\*\*(.+?)\*\*/g, '<span class="acc">$1</span>');
+
+window.READY = (async () => {
+  const loads = [];
+  S.forEach((s, i) => {
+    const sc = document.createElement('div');
+    sc.className = 'scene'; sc.style.zIndex = i + 1;
+    if (s.paper) sc.style.setProperty('--sp', s.paper);
+    sc.innerHTML = '<div class="fibre"></div><div class="grain"></div><div class="world"></div><div class="vig"></div>';
+    const world = sc.querySelector('.world');
+    (s.layers || []).forEach((L, k) => {
+      const el = document.createElement('div');
+      el.className = 'layer' + (L.shadow === false ? '' : ' shadow');
+      el.style.zIndex = L.z != null ? L.z : k;
+      if (L.text) {
+        el.innerHTML = `<div class="paper ${L.style || 'label'}">${rich(L.text)}</div>`;
+        if (L.size) el.firstChild.style.fontSize = L.size + 'vh';
+      } else {
+        const img = document.createElement('img');
+        loads.push(K.loadImg(img, K.asset(L.src)));
+        el.appendChild(img);
+        if (L.h) el.style.height = L.h + 'vh';
+        if (L.w && !L.h) { el.style.width = L.w + 'vw'; img.style.width = '100%'; img.style.height = 'auto'; }
+      }
+      if (L.spin) el.style.transformOrigin = '50% 50%';   /* spin around the middle, not the base */
+      L.el = el; L.seed = i * 31 + k * 7 + 1;
+      world.appendChild(el);
+    });
+    stage.appendChild(sc);
+    s.el = sc; s.world = world;
+  });
+  await Promise.all(loads);
+  Captions.mount(document.body);
+})();
+
+/* how far into an entrance or exit, and what that does to position, scale and rotation */
+function enter(type, from, p) {
+  const e = K.ease.out(p), b = K.ease.back(p);
+  switch (type) {
+    case 'pop': return { s: Math.max(0, b), o: p > 0 ? 1 : 0 };
+    case 'grow': return { s: e, o: p > 0 ? 1 : 0 };
+    case 'drop': return { y: -(1 - b) * 60, r: (1 - e) * -8, o: p > 0 ? 1 : 0 };
+    case 'rise': return { y: (1 - b) * 60, o: p > 0 ? 1 : 0 };
+    case 'slide': {
+      const d = { left: [-1, 0], right: [1, 0], top: [0, -1], bottom: [0, 1] }[from || 'left'];
+      return { x: d[0] * (1 - e) * 110, y: d[1] * (1 - e) * 110, r: d[0] * (1 - e) * 6, o: p > 0 ? 1 : 0 };
+    }
+    default: return { o: e };
+  }
+}
+function exit(type, from, p) {
+  if (p <= 0) return {};
+  const e = K.ease.in(p);
+  switch (type) {
+    case 'pop': return { s: 1 - e };
+    case 'drop': return { y: e * 110, r: e * 10 };
+    case 'slide': {
+      const d = { left: [-1, 0], right: [1, 0], top: [0, -1], bottom: [0, 1] }[from || 'right'];
+      return { x: d[0] * e * 110, y: d[1] * e * 110 };
+    }
+    default: return { o: 1 - e };
+  }
+}
+
+window.render = async (t) => {
+  S.forEach((s, i) => {
+    const next = S[i + 1];
+    const tr = next ? (next.transition || 'slide') : 'cut';
+    const td = tr === 'cut' ? 0 : (next.transitionDur || 0.7);
+    const on = t >= s.start && t < s.end + td;
+    s.el.style.display = on ? '' : 'none';
+    if (!on) return;
+    // scene transitions: the next scene slides in over this one like a new sheet of paper
+    const myTr = s.transition || (i ? 'slide' : 'cut'), myDur = myTr === 'cut' ? 0 : (s.transitionDur || 0.7);
+    const pin = K.ease.inOut(K.prog(t, s.start, s.start + myDur));
+    s.el.style.transform = myTr === 'slide' && i ? `translateX(${(1 - pin) * 100}%) rotate(${(1 - pin) * 1.5}deg)` : 'none';
+    s.el.style.opacity = myTr === 'fade' && i ? pin : 1;
+    s.el.style.boxShadow = myTr === 'slide' && pin < 1 ? '-2vh 0 4vh rgba(40,28,15,.35)' : 'none';
+
+    const local = t - s.start, len = s.end + td - s.start;
+    const tq = STEP ? Math.floor(local * STEP) / STEP : local;   // stop-motion time
+    const step = STEP ? Math.floor(local * STEP) : 0;
+    const cam = s.camera || {}, a = cam.from || [0, 0, 1], b = cam.to || a;
+    const cp = K.ease.inOut(K.clamp(tq / len));
+    const cx = K.lerp(a[0], b[0], cp), cy = K.lerp(a[1], b[1], cp), cz = K.lerp(a[2] || 1, b[2] || 1, cp);
+    s.world.style.transform = `scale(${cz})`;
+
+    (s.layers || []).forEach(L => {
+      const el = L.el, inn = L.in || { at: 0, type: 'fade' }, out = L.out;
+      const pIn = K.prog(tq, inn.at, inn.at + (inn.dur || 0.55));
+      const pOut = out ? K.prog(tq, out.at, out.at + (out.dur || 0.45)) : 0;
+      const A = enter(inn.type || 'fade', inn.from, pIn), B = out ? exit(out.type || 'fade', out.from, pOut) : {};
+      const depth = L.depth == null ? 1 : L.depth;
+      const sway = (L.sway || 0) * Math.sin(tq * 1.6 + L.seed);
+      const bob = (L.bob || 0) * Math.sin(tq * 1.3 + L.seed * 2);
+      const boil = STEP && D.boil !== false ? (K.hash(L.seed * 1000 + step) - 0.5) : 0;
+      const x = (A.x || 0) + (B.x || 0) + cx * depth;
+      const y = (A.y || 0) + (B.y || 0) + cy * depth + bob;
+      const r = (L.rot || 0) + (A.r || 0) + (B.r || 0) + sway + boil * 0.6 + (L.spin || 0) * tq;
+      const sc = (A.s == null ? 1 : A.s) * (B.s == null ? 1 : B.s);
+      el.style.left = L.x + '%'; el.style.top = L.y + '%';
+      el.style.transform = `translate(-50%, -50%) translate(${x}vw, ${y}vh) rotate(${r}deg) scale(${sc * (L.flip ? -1 : 1)}, ${sc})`;
+      el.style.opacity = Math.min(A.o == null ? 1 : A.o, B.o == null ? 1 : B.o);
+    });
+  });
+  Captions.update(t);
+};
+</script></body></html>

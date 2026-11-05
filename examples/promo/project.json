@@ -1,0 +1,118 @@
+{
+ "template": "promo",
+ "size": "1920x1080",
+ "fps": 30,
+ "audio": "voice.mp3",
+ "words": "words.json",
+ "music": {
+  "file": "music.mp3",
+  "db": -22,
+  "fadeOut": 2.5
+ },
+ "brand": {
+  "accent": "#FF7A45",
+  "bg": "#101318",
+  "bg2": "#232A36"
+ },
+ "captions": {
+  "mode": "phrase"
+ },
+ "scenes": [
+  {
+   "start": 0.0,
+   "end": 2.65,
+   "kind": "video",
+   "src": "stock/video-4492718.mp4",
+   "in": 1.0,
+   "move": "in"
+  },
+  {
+   "start": 2.65,
+   "end": 4.55,
+   "kind": "video",
+   "src": "stock/video-15517230.mp4",
+   "in": 0.5,
+   "move": "left"
+  },
+  {
+   "start": 4.55,
+   "end": 6.5,
+   "kind": "video",
+   "src": "stock/video-13283744.mp4",
+   "in": 0.0,
+   "move": "in"
+  },
+  {
+   "start": 6.5,
+   "end": 8.9,
+   "kind": "video",
+   "src": "stock/video-1395943.mp4",
+   "in": 3.0,
+   "move": "right"
+  },
+  {
+   "start": 8.9,
+   "end": 11.2,
+   "kind": "video",
+   "src": "stock/video-6984880.mp4",
+   "in": 2.0,
+   "move": "in",
+   "fade": 0.4,
+   "text": {
+    "headline": "Just **describe** it.",
+    "position": "right"
+   },
+   "textDelay": 0.5
+  },
+  {
+   "start": 11.2,
+   "end": 15.15,
+   "kind": "video",
+   "src": "stock/video-14002824.mp4",
+   "in": 1.0,
+   "move": "left"
+  },
+  {
+   "start": 15.15,
+   "end": 18.75,
+   "kind": "video",
+   "src": "stock/video-9218144.mp4",
+   "in": 1.0,
+   "move": "in"
+  },
+  {
+   "start": 18.75,
+   "end": 23.15,
+   "kind": "video",
+   "src": "stock/video-1536323.mp4",
+   "in": 4.0,
+   "move": "right"
+  },
+  {
+   "start": 23.15,
+   "end": 28.5,
+   "kind": "video",
+   "src": "stock/video-9365192.mp4",
+   "in": 4.0,
+   "move": "in"
+  },
+  {
+   "start": 28.5,
+   "end": 32.45,
+   "kind": "video",
+   "src": "stock/video-4492718.mp4",
+   "in": 7.0,
+   "move": "out"
+  },
+  {
+   "start": 32.45,
+   "end": 34.9,
+   "kind": "card",
+   "fade": 0.5,
+   "captions": false,
+   "headline": "Make videos with **Claude**",
+   "sub": "A hands-on course for instructional designers",
+   "cta": "Start the course"
+  }
+ ]
+}

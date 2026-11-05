@@ -1,0 +1,9 @@
+Here's what happens when you ask Claude for a video.
+
+First, you describe it, in plain words. Claude turns that into a plan: what's said, and what's on screen.
+
+Then it gathers the pieces. A voice from ElevenLabs. Footage from Pexels. Art from Gemini.
+
+Every frame is drawn like a web page, one at a time. And before anything renders, Claude shows you a preview, so you can say: make that title bigger.
+
+Then ffmpeg stitches the frames and the sound into a video. Your notes go in. A finished video comes out.

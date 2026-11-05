@@ -1,0 +1,32 @@
+@font-face { font-family: 'Inter'; src: url('../fonts/Inter.ttf'); font-weight: 100 900; }
+@font-face { font-family: 'Poppins'; src: url('../fonts/Poppins-Bold.ttf'); font-weight: 700; }
+@font-face { font-family: 'Poppins'; src: url('../fonts/Poppins-ExtraBold.ttf'); font-weight: 800; }
+@font-face { font-family: 'Caveat'; src: url('../fonts/Caveat.ttf'); font-weight: 400 700; }
+
+:root {
+  --accent: #FF7A45; --accent2: #4DA3FF; --text: #FFFFFF; --bg: #12151B; --bg2: #1E232D;
+  --font: 'Inter'; --font-display: 'Poppins';
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font), sans-serif; }
+#stage { position: absolute; inset: 0; overflow: hidden; }
+
+/* ---- captions: white, bold, black outline and shadow (readable on any background) ---- */
+.captions {
+  position: absolute; left: 7vw; right: 7vw; bottom: var(--cap-bottom, 6.5vh); z-index: 50;
+  text-align: center; pointer-events: none;
+  font-family: var(--cap-font, var(--font)), sans-serif; font-weight: var(--cap-weight, 800);
+  font-size: var(--cap-size, 4.6vh); line-height: 1.25; letter-spacing: -0.005em;
+  color: var(--cap-color, #FFFFFF);
+  text-shadow: var(--cap-shadow,
+    0.045em 0 0 #000, -0.045em 0 0 #000, 0 0.045em 0 #000, 0 -0.045em 0 #000,
+    0.032em 0.032em 0 #000, -0.032em 0.032em 0 #000, 0.032em -0.032em 0 #000, -0.032em -0.032em 0 #000,
+    0 0.08em 0.3em rgba(0,0,0,0.85));
+}
+.captions.top { top: var(--cap-top, 6vh); bottom: auto; }
+.cap-line {
+  background: var(--cap-bg, transparent); padding: var(--cap-pad, 0.06em 0.3em); border-radius: 0.22em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.captions .w { display: inline-block; transform-origin: 50% 80%; }
+.captions.karaoke .w.now { color: var(--cap-highlight, #FFD84D); }

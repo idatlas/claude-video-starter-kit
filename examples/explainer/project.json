@@ -1,0 +1,428 @@
+{
+ "template": "cutout",
+ "size": "1920x1080",
+ "fps": 30,
+ "audio": "voice.mp3",
+ "words": "words.json",
+ "paper": "#F2E8D5",
+ "stepFps": 12,
+ "brand": {
+  "accent": "#FF7A45"
+ },
+ "captions": {
+  "mode": "phrase",
+  "style": {
+   "--cap-color": "#1F2430",
+   "--cap-shadow": "none",
+   "--cap-bg": "#FFFDF7",
+   "--cap-pad": "0.18em 0.5em 0.22em",
+   "--cap-size": "4vh",
+   "--cap-bottom": "5vh"
+  }
+ },
+ "scenes": [
+  {
+   "start": 0,
+   "end": 2.4,
+   "transition": "cut",
+   "camera": {
+    "from": [
+     0,
+     0,
+     1
+    ],
+    "to": [
+     -1.5,
+     0,
+     1.04
+    ]
+   },
+   "layers": [
+    {
+     "text": "How the **pipeline** works",
+     "style": "title",
+     "x": 50,
+     "y": 24,
+     "rot": -1.5,
+     "depth": 0.6,
+     "in": {
+      "at": 0.0,
+      "type": "drop"
+     }
+    },
+    {
+     "src": "art-gemini/laptop-cut.png",
+     "x": 50,
+     "y": 56,
+     "h": 36,
+     "in": {
+      "at": 0.35,
+      "type": "pop"
+     },
+     "sway": 0.8
+    }
+   ]
+  },
+  {
+   "start": 2.4,
+   "end": 9.3,
+   "transition": "slide",
+   "paper": "#E9EEF0",
+   "camera": {
+    "from": [
+     1.5,
+     0,
+     1
+    ],
+    "to": [
+     -1.5,
+     0,
+     1.03
+    ]
+   },
+   "layers": [
+    {
+     "src": "art-gemini/bubble-cut.png",
+     "x": 30,
+     "y": 44,
+     "h": 30,
+     "in": {
+      "at": 0.2,
+      "type": "pop"
+     },
+     "sway": 1.2
+    },
+    {
+     "text": "1  Describe it",
+     "style": "label",
+     "x": 30,
+     "y": 74,
+     "rot": -2,
+     "in": {
+      "at": 0.6,
+      "type": "drop"
+     }
+    },
+    {
+     "src": "art-gemini/plan-cut.png",
+     "x": 70,
+     "y": 42,
+     "h": 44,
+     "in": {
+      "at": 2.6,
+      "type": "slide",
+      "from": "right"
+     },
+     "sway": 0.8
+    },
+    {
+     "text": "2  Claude plans it",
+     "style": "label",
+     "x": 70,
+     "y": 74,
+     "rot": 1.5,
+     "in": {
+      "at": 3.1,
+      "type": "drop"
+     }
+    }
+   ]
+  },
+  {
+   "start": 9.3,
+   "end": 16.2,
+   "transition": "slide",
+   "camera": {
+    "from": [
+     0,
+     0,
+     1
+    ],
+    "to": [
+     0,
+     -1,
+     1.04
+    ]
+   },
+   "layers": [
+    {
+     "text": "Then it gathers the pieces",
+     "style": "title",
+     "x": 50,
+     "y": 20,
+     "size": 7,
+     "rot": -1,
+     "depth": 0.5,
+     "in": {
+      "at": 0.2,
+      "type": "drop"
+     }
+    },
+    {
+     "src": "art-gemini/mic-cut.png",
+     "x": 22,
+     "y": 52,
+     "h": 40,
+     "in": {
+      "at": 2.35,
+      "type": "pop"
+     },
+     "sway": 1.5
+    },
+    {
+     "text": "Voice",
+     "style": "label",
+     "x": 22,
+     "y": 74,
+     "in": {
+      "at": 2.6,
+      "type": "drop"
+     }
+    },
+    {
+     "src": "art-gemini/film-cut.png",
+     "x": 50,
+     "y": 52,
+     "h": 30,
+     "in": {
+      "at": 3.95,
+      "type": "pop"
+     },
+     "sway": 1.5
+    },
+    {
+     "text": "Footage",
+     "style": "label",
+     "x": 50,
+     "y": 74,
+     "rot": 1.5,
+     "in": {
+      "at": 4.2,
+      "type": "drop"
+     }
+    },
+    {
+     "src": "art-gemini/palette-cut.png",
+     "x": 78,
+     "y": 52,
+     "h": 30,
+     "in": {
+      "at": 5.4,
+      "type": "pop"
+     },
+     "sway": 1.5
+    },
+    {
+     "text": "Art",
+     "style": "label",
+     "x": 78,
+     "y": 74,
+     "rot": -2,
+     "in": {
+      "at": 5.65,
+      "type": "drop"
+     }
+    }
+   ]
+  },
+  {
+   "start": 16.2,
+   "end": 19.8,
+   "transition": "slide",
+   "paper": "#EFE6F0",
+   "camera": {
+    "from": [
+     1,
+     0,
+     1.02
+    ],
+    "to": [
+     -1,
+     0,
+     1.06
+    ]
+   },
+   "layers": [
+    {
+     "src": "art-gemini/frames-cut.png",
+     "x": 50,
+     "y": 46,
+     "h": 46,
+     "in": {
+      "at": 0.2,
+      "type": "drop"
+     },
+     "sway": 0.8
+    },
+    {
+     "text": "One frame at a time",
+     "style": "note",
+     "x": 74,
+     "y": 24,
+     "rot": 4,
+     "in": {
+      "at": 2.2,
+      "type": "pop"
+     }
+    }
+   ]
+  },
+  {
+   "start": 19.8,
+   "end": 25.4,
+   "transition": "slide",
+   "camera": {
+    "from": [
+     0,
+     0,
+     1
+    ],
+    "to": [
+     -1,
+     0,
+     1.04
+    ]
+   },
+   "layers": [
+    {
+     "src": "art-gemini/preview-cut.png",
+     "x": 44,
+     "y": 46,
+     "h": 44,
+     "in": {
+      "at": 0.15,
+      "type": "grow"
+     },
+     "sway": 0.5
+    },
+    {
+     "text": "Preview first",
+     "style": "label",
+     "x": 44,
+     "y": 74,
+     "in": {
+      "at": 1.6,
+      "type": "drop"
+     }
+    },
+    {
+     "text": "make that title bigger!",
+     "style": "note",
+     "x": 76,
+     "y": 28,
+     "rot": 5,
+     "in": {
+      "at": 4.0,
+      "type": "drop"
+     }
+    }
+   ]
+  },
+  {
+   "start": 25.4,
+   "end": 29.9,
+   "transition": "slide",
+   "paper": "#E4EFEA",
+   "camera": {
+    "from": [
+     0,
+     0,
+     1
+    ],
+    "to": [
+     0,
+     0,
+     1.05
+    ]
+   },
+   "layers": [
+    {
+     "src": "art-gemini/gear-cut.png",
+     "x": 44,
+     "y": 44,
+     "h": 36,
+     "in": {
+      "at": 0.25,
+      "type": "pop"
+     },
+     "spin": 40
+    },
+    {
+     "src": "art-gemini/gear-cut.png",
+     "x": 58.5,
+     "y": 58,
+     "h": 23,
+     "in": {
+      "at": 0.5,
+      "type": "pop"
+     },
+     "spin": -61,
+     "rot": 22
+    },
+    {
+     "text": "ffmpeg stitches it together",
+     "style": "label",
+     "x": 50,
+     "y": 74,
+     "in": {
+      "at": 0.9,
+      "type": "drop"
+     }
+    }
+   ]
+  },
+  {
+   "start": 29.9,
+   "end": 33.8,
+   "transition": "slide",
+   "camera": {
+    "from": [
+     0,
+     0,
+     1
+    ],
+    "to": [
+     0,
+     0,
+     1.03
+    ]
+   },
+   "layers": [
+    {
+     "src": "art-gemini/bubble-cut.png",
+     "x": 25,
+     "y": 44,
+     "h": 24,
+     "in": {
+      "at": 0.2,
+      "type": "pop"
+     },
+     "sway": 1.2
+    },
+    {
+     "text": "\u2192",
+     "style": "title",
+     "x": 50,
+     "y": 48,
+     "shadow": false,
+     "in": {
+      "at": 0.9,
+      "type": "slide",
+      "from": "left"
+     }
+    },
+    {
+     "src": "art-gemini/video-cut.png",
+     "x": 75,
+     "y": 44,
+     "h": 28,
+     "in": {
+      "at": 1.65,
+      "type": "pop"
+     },
+     "sway": 1.2
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+To find stock footage for you, Claude needs a Pexels API key. It's free, and it takes about a minute.
+
+Sign in to Pexels, then open the Pexels API page.
+
+Click Your API Key.
+
+Your key is in this box. Click the copy icon next to it, so you get every character.
+
+Now open your .env file. Paste the key right after the equals sign, and save. Never paste a key into a chat.
+
+Then ask Claude to check your keys. When Pexels says OK, you're ready to find footage.
